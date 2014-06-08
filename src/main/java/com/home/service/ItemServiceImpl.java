@@ -8,18 +8,21 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * @author ashar61
  */
 public class ItemServiceImpl implements ItemService {
-
-    private final File directory = new File(System.getProperty("java.io.tmpdir"));
+    private final File directory = new File("C:/Items");
 
     @Override
     public Item get(String itemId) throws ServiceException {
-        File itemFile = new File(directory.getAbsolutePath() + File.separator + itemId);
+        File itemFile = new File(directory.getAbsolutePath() + File.separator + itemId + ".json");
+        System.out.println("Getting Item " + itemFile.getAbsolutePath());
+
         if (itemFile.exists()) {
+            System.out.println("Getting Item " + itemFile.getAbsolutePath());
             String content = FileUtils.getStringFromFile(itemFile);
             try {
                 return JacksonUtil.toObject(content, Item.class);
@@ -46,14 +49,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item create(Item item) throws ServiceException {
-
-
-        File itemFile = new File(directory.getAbsolutePath() + File.separator + item.getItemId());
+        File itemFile = new File(directory.getAbsolutePath() + File.separator + item.getItemId() +".json");
         if (itemFile.exists()) {
             throwException("Item already exists. Please update instead", Response.Status.BAD_REQUEST);
         } else {
             try {
-                FileWriterUtil.getWriter(itemFile).write(JacksonUtil.toJson(item));
+                Writer writer = FileWriterUtil.getWriter(itemFile);
+                writer.write(JacksonUtil.toJson(item));
+                writer.close();
             } catch (IOException e) {
                 throwException("Exception occurred in writing the item", Response.Status.INTERNAL_SERVER_ERROR);
             }
@@ -63,10 +66,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item update(Item item) throws ServiceException {
-        File itemFile = new File(directory.getAbsolutePath() + File.separator + item.getItemId());
+        File itemFile = new File(directory.getAbsolutePath() + File.separator + item.getItemId()+ ".json");
         if (itemFile.exists()) {
             try {
-                FileWriterUtil.getWriter(itemFile).write(JacksonUtil.toJson(item));
+                Writer writer = FileWriterUtil.getWriter(itemFile);
+                writer.write(JacksonUtil.toJson(item));
+                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Exception occurred in writing the item");
             }
@@ -79,7 +84,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public boolean delete(String itemId) throws ServiceException {
-        File itemFile = new File(directory.getAbsolutePath() + File.separator + itemId);
+        File itemFile = new File(directory.getAbsolutePath() + File.separator + itemId + ".json");
         if (itemFile.exists()) {
             FileUtils.delete(itemFile);
             return true;
