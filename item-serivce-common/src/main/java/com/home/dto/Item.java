@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author ashar61
  */
 public class Item {
 
